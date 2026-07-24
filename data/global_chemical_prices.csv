@@ -1,0 +1,12 @@
+﻿product,region,price_floor_usd,price_ceiling_usd,source
+MEG,FOB کره,-,-,chemical
+MEG,CFR چین,522,524,chemical
+MEG,FOB جنوب شرقی آسیا,-,-,chemical
+MEG,CFR (یوان) داخلی چین,4236,4256,chemical
+MEG,CFR چین/تایوان,-,-,chemical
+MEG,CFR تایوان,-,-,chemical
+MEG,CFR هند,-,-,chemical
+MEG,CFR کره,-,-,chemical
+MEG,CFR جنوب شرقی آسیا,-,-,chemical
+MEG,CFR شمال شرقی آسیا,-,-,chemical
+MEG,FOB China,-,-,chemical
