@@ -1,14 +1,17 @@
 import random
 
 BASE_URL = "https://wikiplast.ir"
-MAX_RETRIES = 3
+MAX_RETRIES = 2
 
 # Delay range in seconds (min, max) — randomized per request
-DELAY_MIN = 1.0
-DELAY_MAX = 3.5
+DELAY_MIN = 0.3
+DELAY_MAX = 1.2
 
 # Backoff multiplier on retry
 BACKOFF_BASE = 2.0
+
+# Concurrency — max parallel requests (keep low to avoid blocks)
+MAX_WORKERS = 4
 
 # Realistic browser user agents (rotate randomly)
 USER_AGENTS = [

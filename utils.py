@@ -3,25 +3,28 @@ import csv
 import os
 import random
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from bs4 import BeautifulSoup
-from config import BASE_URL, MAX_RETRIES, random_headers, random_delay, BACKOFF_BASE
+from config import BASE_URL, MAX_RETRIES, random_headers, random_delay, BACKOFF_BASE, MAX_WORKERS
 
-# Persistent session to reuse cookies across requests
-_session = None
+# Persistent session per thread
+_sessions = {}
+_lock_print = False
 
 
 def get_session():
-    """Get or create a persistent session with cookie support."""
-    global _session
-    if _session is None:
-        _session = requests.Session()
-        # Set initial cookies by visiting homepage
+    """Get or create a thread-local persistent session."""
+    import threading
+    tid = threading.current_thread().ident
+    if tid not in _sessions:
+        s = requests.Session()
         try:
-            _session.get(BASE_URL, headers=random_headers(), timeout=15)
+            s.get(BASE_URL, headers=random_headers(), timeout=15)
             time.sleep(random_delay())
         except Exception:
             pass
-    return _session
+        _sessions[tid] = s
+    return _sessions[tid]
 
 
 def fetch(url, session=None):
@@ -32,40 +35,52 @@ def fetch(url, session=None):
     for attempt in range(MAX_RETRIES):
         headers = random_headers()
         try:
-            resp = s.get(full_url, headers=headers, timeout=30)
+            resp = s.get(full_url, headers=headers, timeout=20)
             resp.encoding = "utf-8"
 
             if resp.status_code == 200:
                 time.sleep(random_delay())
                 return resp
             elif resp.status_code == 429:
-                # Rate limited — back off significantly
-                wait = random.uniform(10, 30)
+                wait = random.uniform(8, 20)
                 print(f"  Rate limited (429), waiting {wait:.1f}s...")
                 time.sleep(wait)
             elif resp.status_code == 403:
-                # Forbidden — might be blocked, rotate session
                 print(f"  Blocked (403), rotating session...")
-                global _session
-                _session = None
-                time.sleep(random.uniform(5, 15))
+                import threading
+                tid = threading.current_thread().ident
+                _sessions.pop(tid, None)
+                time.sleep(random.uniform(3, 8))
             else:
                 print(f"  HTTP {resp.status_code} for {full_url} (attempt {attempt+1})")
 
         except requests.Timeout:
-            wait = random.uniform(3, 8) * (BACKOFF_BASE ** attempt)
-            print(f"  Timeout for {full_url}, waiting {wait:.1f}s (attempt {attempt+1})")
+            wait = random.uniform(2, 5) * (BACKOFF_BASE ** attempt)
             time.sleep(wait)
         except requests.ConnectionError:
-            wait = random.uniform(5, 15) * (BACKOFF_BASE ** attempt)
-            print(f"  Connection error for {full_url}, waiting {wait:.1f}s (attempt {attempt+1})")
+            wait = random.uniform(3, 8) * (BACKOFF_BASE ** attempt)
             time.sleep(wait)
         except requests.RequestException as e:
-            print(f"  Error fetching {full_url}: {e} (attempt {attempt+1})")
             time.sleep(random_delay() * (attempt + 1))
 
-    print(f"  FAILED after {MAX_RETRIES} attempts: {full_url}")
     return None
+
+
+def fetch_all(urls):
+    """Fetch multiple URLs concurrently with ThreadPoolExecutor."""
+    results = {}
+
+    def _fetch_one(url):
+        resp = fetch(url)
+        return (url, resp)
+
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = {executor.submit(_fetch_one, url): url for url in urls}
+        for future in as_completed(futures):
+            url, resp = future.result()
+            results[url] = resp
+
+    return results
 
 
 def parse(html):

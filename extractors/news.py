@@ -1,8 +1,8 @@
-"""Extract news and articles."""
+"""Extract news and articles with concurrent fetching."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from utils import fetch, parse, save_csv, text
+from utils import fetch, fetch_all, parse, save_csv, text
 from config import BASE_URL
 
 MAX_PAGES = 20
@@ -13,7 +13,6 @@ def extract_items(soup):
     items = []
     seen_urls = set()
 
-    # Method 1: Box cards (news homepage, medbox)
     for item in soup.select(".nibox, .newsbox, .box, .medbox, .newsitems"):
         link = item.select_one("a[href]")
         if not link:
@@ -32,12 +31,10 @@ def extract_items(soup):
                 "date": text(date_el) if date_el else "",
             })
 
-    # Method 2: Direct article/news links
     for link in soup.select('a[href*="/news/"], a[href*="/article/"]'):
         href = link.get("href", "")
         title = text(link)
         if title and href and len(title) > 5 and href not in seen_urls:
-            # Skip navigation/utility links
             if any(skip in href for skip in ["/archive-news/", "/search"]):
                 continue
             seen_urls.add(href)
@@ -48,7 +45,6 @@ def extract_items(soup):
                 "date": "",
             })
 
-    # Method 3: List items
     for li in soup.select(".newslist li, .list li"):
         link = li.select_one("a[href]")
         if not link:
@@ -68,28 +64,26 @@ def extract_items(soup):
 
 
 def extract_paginated(url_base, label):
-    """Extract items from paginated listing."""
+    """Extract items from paginated listing using concurrent fetch."""
+    # Build all page URLs
+    page_urls = [url_base] + [f"{url_base}/{p}" for p in range(2, MAX_PAGES + 1)]
+
+    print(f"  Pre-fetching {len(page_urls)} {label} pages...")
+    results = fetch_all(page_urls)
+
     all_items = []
     seen = set()
-    for page in range(1, MAX_PAGES + 1):
-        url = f"{url_base}/{page}" if page > 1 else url_base
-        resp = fetch(url)
+    for url in page_urls:
+        resp = results.get(url)
         if not resp:
-            break
+            continue
         soup = parse(resp.text)
         items = extract_items(soup)
-        # Deduplicate
         new_items = [i for i in items if i["url"] not in seen]
         for i in new_items:
             seen.add(i["url"])
-        if not new_items:
-            break
-        all_items.extend(new_items)
-        print(f"  {label} page {page}: {len(new_items)} items (total: {len(all_items)})")
-
-        has_next = any("بعدی" in text(a) for a in soup.select("a"))
-        if not has_next and page > 1:
-            break
+        if new_items:
+            all_items.extend(new_items)
 
     return all_items
 
