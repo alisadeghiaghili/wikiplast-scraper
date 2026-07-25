@@ -5,6 +5,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from utils import fetch, fetch_all, parse, save_csv, text
 from config import BASE_URL
 
+MAX_CAT_PAGES = 5  # Max pages per category
+
 
 def extract_companies_from_page(soup):
     """Extract company cards from a page."""
@@ -60,34 +62,57 @@ def run():
 
     print(f"Found {len(categories)} categories")
 
-    # Build all page URLs (page 1 + pagination)
-    all_page_urls = []
-    cat_map = {}  # url -> category name
+    # First pass: fetch page 1 of all categories concurrently
+    page1_urls = [cat["url"] for cat in categories]
+    print(f"  Fetching page 1 of {len(page1_urls)} categories...")
+    results = fetch_all(page1_urls)
 
+    # Parse page 1 and collect URLs that need page 2+
+    page2_urls = []
+    cat_map = {}
     for cat in categories:
-        cat_base = cat["url"].rstrip("/")
-        all_page_urls.append(cat["url"])
-        cat_map[cat["url"]] = cat["name"]
-        for page in range(2, 11):
-            page_url = f"{cat_base}/{page}"
-            all_page_urls.append(page_url)
-            cat_map[page_url] = cat["name"]
-
-    print(f"  Pre-fetching {len(all_page_urls)} pages concurrently...")
-    results = fetch_all(all_page_urls)
-
-    # Parse results
-    for url, resp in results.items():
+        resp = results.get(cat["url"])
         if not resp:
             continue
         page_soup = parse(resp.text)
         companies = extract_companies_from_page(page_soup)
-        if not companies:
-            continue
-        cat_name = cat_map.get(url, "")
         for c in companies:
-            c["category"] = cat_name
+            c["category"] = cat["name"]
         all_companies.extend(companies)
+
+        # If we got a full page (12+ companies), try page 2
+        if len(companies) >= 12:
+            page2_url = cat["url"].rstrip("/") + "/2"
+            page2_urls.append(page2_url)
+            cat_map[page2_url] = cat["name"]
+
+    print(f"  Page 1 done: {len(all_companies)} companies")
+    print(f"  {len(page2_urls)} categories need page 2+")
+
+    # Second pass: fetch page 2+ concurrently
+    if page2_urls:
+        results2 = fetch_all(page2_urls)
+        for url, resp in results2.items():
+            if not resp:
+                continue
+            page_soup = parse(resp.text)
+            companies = extract_companies_from_page(page_soup)
+            if not companies:
+                continue
+            cat_name = cat_map.get(url, "")
+            for c in companies:
+                c["category"] = cat_name
+            all_companies.extend(companies)
+
+            # If full page, queue page 3
+            if len(companies) >= 12:
+                page_num = int(url.rstrip("/").split("/")[-1]) + 1
+                if page_num <= MAX_CAT_PAGES:
+                    next_url = "/".join(url.rstrip("/").split("/")[:-1]) + f"/{page_num}"
+                    page2_urls.append(next_url)
+                    cat_map[next_url] = cat_name
+
+        print(f"  Page 2+ done: {len(all_companies)} total companies")
 
     save_csv(all_companies, "companies.csv")
     print(f"Total companies extracted: {len(all_companies)}")
