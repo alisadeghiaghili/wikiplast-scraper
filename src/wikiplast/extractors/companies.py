@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from wikiplast.adapters.http_client import HttpClient
+from wikiplast.adapters.listing_resume import ListingCheckpoint
 from wikiplast.adapters.storage import persist_section
 from wikiplast.domain.companies import dedupe_companies, parse_company_cards
 from wikiplast.domain.html_parsing import clean_text, parse_html
@@ -92,12 +93,14 @@ def extract_companies(
     client: HttpClient,
     *,
     max_pages_per_category: int = 5,
+    listing_ckpt: ListingCheckpoint | None = None,
 ) -> list[CompanyCard]:
     """Extract unique companies from the directory.
 
     Args:
         client: HTTP client.
         max_pages_per_category: Hard cap on pages per category (inclusive).
+        listing_ckpt: Optional page-level resume store.
 
     Returns:
         list[CompanyCard]: Deduplicated companies.
@@ -124,6 +127,8 @@ def extract_companies(
             continue
         if page_num > max_pages_per_category:
             continue
+        if listing_ckpt is not None and listing_ckpt.is_page_done(path):
+            continue
         seen_pages.add(path)
         try:
             html = client.get(path)
@@ -140,12 +145,16 @@ def extract_companies(
             category=category_name,
         )
         collected.extend(cards)
+        if listing_ckpt is not None:
+            listing_ckpt.mark_page_done(path)
 
         # If the page looks full, queue the next page.
         if len(cards) >= 12 and page_num < max_pages_per_category:
             next_path = f"{path.rstrip('/')}/{page_num + 1}"
             queue.append((next_path, category_name, page_num + 1))
 
+    if listing_ckpt is not None:
+        listing_ckpt.save()
     return dedupe_companies(collected)
 
 
@@ -153,17 +162,30 @@ def _rows(cards: Sequence[CompanyCard]) -> list[dict[str, Any]]:
     return [card.to_row() for card in cards]
 
 
-def run_companies(client: HttpClient, data_dir: Path) -> dict[str, Path]:
-    """Extract companies and persist CSV/SQLite/BCP artifacts.
+def run_companies(
+    client: HttpClient,
+    data_dir: Path,
+    *,
+    resume_listings: bool = False,
+) -> dict[str, Path]:
+    """Extract companies and persist CSV/SQLite/BCP/JSONL artifacts.
 
     Args:
         client: HTTP client.
         data_dir: Output root.
+        resume_listings: Skip listing pages already recorded in checkpoints.
 
     Returns:
         dict[str, Path]: Artifact paths by kind.
     """
-    cards = extract_companies(client)
+    ckpt = None
+    if resume_listings:
+        ckpt = ListingCheckpoint(
+            data_dir / "checkpoints" / "companies_pages.json",
+            section="companies_pages",
+            resume=True,
+        )
+    cards = extract_companies(client, listing_ckpt=ckpt)
     return persist_section(
         _rows(cards),
         data_dir=data_dir,

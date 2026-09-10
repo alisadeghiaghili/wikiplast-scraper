@@ -41,7 +41,7 @@
 - [x] RSS `/feeds`
 - [x] Unit tests on HTML fixtures
 
-## v0.6.0 (current)
+## v0.6.0
 
 - [x] News/article/company detail parsers
 - [x] Checkpoint resume store (`data/checkpoints/*.json`)
@@ -49,10 +49,16 @@
 - [x] CLI `--section details`, `--detail-limit`, `--no-resume`
 - [x] Network smoke tests (`pytest -m network`)
 
-## v0.7.0 (next)
+## v0.7.0 (current)
+
+- [x] Listing resume for news/articles/events/companies (`--resume-listings`)
+- [x] JSONL export alongside CSV/SQLite/BCP
+- [x] GitHub Actions CI (ruff + unit tests, Python 3.11/3.12)
+- [x] Unit tests for listing resume and JSONL
+
+## v0.8.0 (next)
 
 - [ ] Media / TV asset catalogs (beyond shared sidebar cards)
-- [ ] Resume for listing crawls (not only details)
-- [ ] Tagged release automation / CI workflow
 - [ ] Optional Parquet export
+- [ ] Live end-to-end extract runbook / coverage snapshot on main
 
