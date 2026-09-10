@@ -31,8 +31,4 @@ Thumbs.db
 .env.*
 
 # Data artifacts (regenerate via CLI)
-data/csv/
-data/sqlserver/
-data/wikiplast.sqlite
-data/*.csv
-data/*.json
+data/
