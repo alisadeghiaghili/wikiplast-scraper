@@ -56,7 +56,7 @@
 - [x] GitHub Actions CI (ruff + unit tests, Python 3.11/3.12)
 - [x] Unit tests for listing resume and JSONL
 
-## v0.8.0 (current)
+## v0.8.0
 
 - [x] Media catalog `/media/{slug}`
 - [x] Training videos `/tv` → `/videos/{id}`
@@ -66,8 +66,16 @@
 Parquet export deferred: JSONL + BCP already cover SQL Server / pandas loads
 without adding a heavy `pyarrow` dependency.
 
-## v0.9.0 (next)
+## v0.9.0 (current)
 
-- [ ] Live end-to-end extract on public sections with coverage snapshot
-- [ ] Optional rate-limit profile presets (conservative / default)
+- [x] Rate-limit profiles (`conservative` / `default` / `fast`)
+- [x] `--section snapshot` public bundle (prices, deals, offers, news, RSS, media)
+- [x] Live snapshot run (2026-09-10): 428 npc, 63 archive, 128 market, 4 deals, 7 offers, 39 news, 100 feeds, 12 media, 6 videos
+- [x] Unit tests for profiles and coverage labeling
+
+## v1.0.0 (next)
+
+- [ ] Full companies + catalog live crawl with resume into SQL Server staging
+- [ ] Typed SQL Server DDL generator from data dictionary
+- [ ] Tag `v1.0.0` after one clean production extract
 

@@ -2,7 +2,7 @@
 
 Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 
-**Version:** 0.8.0
+**Version:** 0.9.0
 
 ## Status
 
@@ -19,6 +19,7 @@ Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 | Details + resume/checkpoint + coverage report + network smoke tests | done |
 | Listing resume + GitHub Actions CI | done |
 | Media/TV catalogs + `wikiplast report` inventory | done |
+| Public snapshot section + rate-limit profiles | done |
 
 ## Honest data notes
 
@@ -57,6 +58,12 @@ wikiplast extract --section content --data-dir data
 
 # Media and training videos
 wikiplast extract --section media --data-dir data
+
+# Public snapshot (prices + deals/offers + short news + RSS + media)
+wikiplast --data-dir data extract --section snapshot --rate-profile default --snapshot-news-pages 2
+
+# Rate profiles: conservative | default | fast
+wikiplast --data-dir data extract --section prices --rate-profile conservative
 
 # Inventory report (CSV counts, SQLite/BCP/JSONL presence, coverage)
 wikiplast report --data-dir data

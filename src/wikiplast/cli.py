@@ -10,7 +10,7 @@ from pathlib import Path
 from wikiplast import __version__
 from wikiplast.adapters.http_client import HttpClient
 from wikiplast.adapters.report import format_report
-from wikiplast.config import Settings
+from wikiplast.config import RATE_PROFILES, Settings
 from wikiplast.extractors.bourse import run_bourse
 from wikiplast.extractors.catalog import run_catalog
 from wikiplast.extractors.companies import run_companies
@@ -18,6 +18,7 @@ from wikiplast.extractors.content import run_content
 from wikiplast.extractors.details import run_details
 from wikiplast.extractors.media import run_media
 from wikiplast.extractors.price_sections import run_all_prices
+from wikiplast.extractors.snapshot import run_public_snapshot
 
 SECTION_CHOICES = (
     "prices",
@@ -27,6 +28,7 @@ SECTION_CHOICES = (
     "content",
     "details",
     "media",
+    "snapshot",
     "all",
 )
 
@@ -98,6 +100,18 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip listing pages already recorded in checkpoints (content/companies).",
     )
+    extract.add_argument(
+        "--rate-profile",
+        choices=sorted(RATE_PROFILES),
+        default=None,
+        help="Delay profile: conservative | default | fast.",
+    )
+    extract.add_argument(
+        "--snapshot-news-pages",
+        type=int,
+        default=3,
+        help="News listing pages included in --section snapshot (default: 3).",
+    )
     sub.add_parser("report", help="Print a data inventory report for --data-dir.")
     return parser
 
@@ -113,7 +127,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """
     parser = build_parser()
     args = parser.parse_args(argv)
-    settings = Settings.from_env()
+    settings = Settings.from_env(rate_profile=getattr(args, "rate_profile", None))
     data_dir = args.data_dir or settings.data_dir
 
     if args.command == "report":
@@ -127,11 +141,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_bourse_flag = "all" in sections or "bourse" in sections
     run_content_flag = "all" in sections or "content" in sections
     run_media_flag = "all" in sections or "media" in sections
+    run_snapshot_flag = "snapshot" in sections
     # Details are heavy; include in "all" only when explicitly requested
     # or when --section details is passed.
     run_details_flag = "details" in sections
 
+    # Snapshot is a self-contained bundle; avoid double-running overlapping sections.
+    if run_snapshot_flag:
+        run_prices = False
+        run_bourse_flag = False
+        run_media_flag = False
+        if "all" in sections:
+            run_content_flag = False
+
     with HttpClient(settings) as client:
+        if run_snapshot_flag:
+            artifacts = run_public_snapshot(
+                client,
+                data_dir,
+                news_pages=args.snapshot_news_pages,
+            )
+            for name, paths in artifacts.items():
+                for kind, path in paths.items():
+                    print(f"{name}.{kind}: {path}")
         if run_prices:
             artifacts = run_all_prices(client, data_dir)
             for name, paths in artifacts.items():
