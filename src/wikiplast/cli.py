@@ -10,11 +10,12 @@ from pathlib import Path
 from wikiplast import __version__
 from wikiplast.adapters.http_client import HttpClient
 from wikiplast.config import Settings
+from wikiplast.extractors.bourse import run_bourse
 from wikiplast.extractors.catalog import run_catalog
 from wikiplast.extractors.companies import run_companies
 from wikiplast.extractors.price_sections import run_all_prices
 
-SECTION_CHOICES = ("prices", "companies", "catalog", "all")
+SECTION_CHOICES = ("prices", "companies", "catalog", "bourse", "all")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -56,6 +57,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional cap on category grade tables (smoke runs).",
     )
+    extract.add_argument(
+        "--max-quota-pages",
+        type=int,
+        default=10,
+        help="Max company-quota pages under /behin.php (default: 10).",
+    )
     return parser
 
 
@@ -77,6 +84,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_prices = "all" in sections or "prices" in sections
     run_companies_flag = "all" in sections or "companies" in sections
     run_catalog_flag = "all" in sections or "catalog" in sections
+    run_bourse_flag = "all" in sections or "bourse" in sections
 
     with HttpClient(settings) as client:
         if run_prices:
@@ -92,6 +100,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 data_dir,
                 grade_history_limit=args.grade_history_limit,
                 max_category_pages=args.max_categories,
+            )
+            for name, paths in artifacts.items():
+                print(f"{name}: {paths['csv']}")
+        if run_bourse_flag:
+            artifacts = run_bourse(
+                client,
+                data_dir,
+                max_quota_pages=args.max_quota_pages,
             )
             for name, paths in artifacts.items():
                 print(f"{name}: {paths['csv']}")
