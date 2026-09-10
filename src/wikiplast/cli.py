@@ -90,6 +90,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Ignore checkpoints and re-crawl details from scratch.",
     )
+    extract.add_argument(
+        "--resume-listings",
+        action="store_true",
+        help="Skip listing pages already recorded in checkpoints (content/companies).",
+    )
     return parser
 
 
@@ -123,7 +128,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             for name, paths in artifacts.items():
                 print(f"{name}: {paths['csv']}")
         if run_companies_flag:
-            paths = run_companies(client, data_dir)
+            paths = run_companies(
+                client, data_dir, resume_listings=args.resume_listings
+            )
             print(f"companies: {paths['csv']}")
         if run_catalog_flag:
             artifacts = run_catalog(
@@ -147,6 +154,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 client,
                 data_dir,
                 max_list_pages=args.max_list_pages,
+                resume_listings=args.resume_listings,
             )
             for name, paths in artifacts.items():
                 print(f"{name}: {paths['csv']}")

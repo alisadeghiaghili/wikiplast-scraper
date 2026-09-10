@@ -2,7 +2,7 @@
 
 Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 
-**Version:** 0.6.0
+**Version:** 0.7.0
 
 ## Status
 
@@ -10,13 +10,14 @@ Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 |------|--------|
 | Package layout (`src/wikiplast`) | done |
 | HTTP client (rate limit, 403 rotation, robots) | done |
-| Storage: CSV + SQLite + SQL Server BCP export | done |
+| Storage: CSV + SQLite + SQL Server BCP + JSONL | done |
 | Price extractors: `npc`, `archive` (`/prices`), `market` | done |
 | Companies extractor with dedupe + real pagination queue | done |
 | Catalog: petros, polymer categories, category grades, grade history, products | done |
 | Bourse: deals, offers, byab, company quotas, compare, info-bourse | done |
 | Content: news, articles, events, honors, ads, topco, managers, RSS | done |
 | Details + resume/checkpoint + coverage report + network smoke tests | done |
+| Listing resume + GitHub Actions CI | done |
 
 ## Honest data notes
 
@@ -69,6 +70,8 @@ wikiplast extract --section content --max-list-pages 3
 data/
 ├── csv/                  # UTF-8-BOM CSV (Excel / pandas)
 ├── sqlserver/            # UTF-8 CSV with NULL token for BULK INSERT
+├── jsonl/                # JSON Lines (one object per line)
+├── checkpoints/          # resume state for details and listings
 ├── wikiplast.sqlite      # local warehouse (table per section)
 ```
 

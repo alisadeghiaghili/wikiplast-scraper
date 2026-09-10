@@ -9,6 +9,7 @@ comma-delimited UTF-8 files with ``NULL`` placeholders suitable for
 from __future__ import annotations
 
 import csv
+import json
 import re
 import sqlite3
 from collections.abc import Iterable, Sequence
@@ -240,6 +241,32 @@ def load_sqlite_table(db_path: Path, table: str) -> list[dict[str, Any]]:
         raise StorageError(f"SQLite read failed for {table}: {exc}") from exc
 
 
+def write_jsonl(
+    rows: Sequence[dict[str, Any]],
+    path: Path,
+) -> Path:
+    """Write rows as UTF-8 JSON Lines (one object per line).
+
+    Args:
+        rows: Mapping rows.
+        path: Destination file path.
+
+    Returns:
+        Path: The path written.
+
+    Raises:
+        StorageError: When the file cannot be written.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with path.open("w", encoding="utf-8", newline="\n") as handle:
+            for row in rows:
+                handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+    except OSError as exc:
+        raise StorageError(f"Failed writing JSONL {path}: {exc}") from exc
+    return path
+
+
 def persist_section(
     rows: Sequence[dict[str, Any]],
     *,
@@ -247,8 +274,9 @@ def persist_section(
     name: str,
     fieldnames: Sequence[str] | None = None,
     write_bcp: bool = True,
+    write_jsonl_file: bool = True,
 ) -> dict[str, Path]:
-    """Persist one section to CSV, SQLite, and optional BCP file.
+    """Persist one section to CSV, SQLite, BCP, and optional JSONL.
 
     Args:
         rows: Section rows.
@@ -256,9 +284,10 @@ def persist_section(
         name: Section name used for file/table names (``npc_prices``).
         fieldnames: Optional explicit columns.
         write_bcp: Also emit ``sqlserver/<name>.bcp.csv``.
+        write_jsonl_file: Also emit ``jsonl/<name>.jsonl``.
 
     Returns:
-        dict[str, Path]: Keys ``csv``, ``sqlite``, and optionally ``bcp``.
+        dict[str, Path]: Artifact paths by kind.
     """
     name = _validate_table_name(name)
     csv_path = write_csv(rows, data_dir / "csv" / f"{name}.csv", fieldnames=fieldnames)
@@ -269,6 +298,8 @@ def persist_section(
         result["bcp"] = export_sqlserver_bcp(
             rows, data_dir / "sqlserver" / f"{name}.bcp.csv", fieldnames=fieldnames
         )
+    if write_jsonl_file:
+        result["jsonl"] = write_jsonl(rows, data_dir / "jsonl" / f"{name}.jsonl")
     return result
 
 
