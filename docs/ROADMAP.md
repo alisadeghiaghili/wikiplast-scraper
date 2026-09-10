@@ -29,7 +29,7 @@
 - [x] Info-bourse metrics + top demand/volume `/info-bourse`
 - [x] Unit tests on HTML fixtures
 
-## v0.5.0 (current)
+## v0.5.0
 
 - [x] News `/archive-news` with early-stop pagination
 - [x] Articles `/articles` (dedupe including ادامه مطلب)
@@ -41,10 +41,18 @@
 - [x] RSS `/feeds`
 - [x] Unit tests on HTML fixtures
 
-## v0.6.0 (next)
+## v0.6.0 (current)
+
+- [x] News/article/company detail parsers
+- [x] Checkpoint resume store (`data/checkpoints/*.json`)
+- [x] Coverage report (`data/coverage.json`)
+- [x] CLI `--section details`, `--detail-limit`, `--no-resume`
+- [x] Network smoke tests (`pytest -m network`)
+
+## v0.7.0 (next)
 
 - [ ] Media / TV asset catalogs (beyond shared sidebar cards)
-- [ ] Detail crawls for news/article/company pages
-- [ ] Resume/checkpoint + coverage report
-- [ ] Network integration smoke tests (marked)
-- [ ] Tagged release automation
+- [ ] Resume for listing crawls (not only details)
+- [ ] Tagged release automation / CI workflow
+- [ ] Optional Parquet export
+

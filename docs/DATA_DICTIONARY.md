@@ -1,4 +1,4 @@
-# Data dictionary (v0.5.0)
+# Data dictionary (v0.6.0)
 
 ## npc_prices / archive_prices / market_prices
 
@@ -246,5 +246,50 @@ Shared schema from content listings.
 | link | TEXT | yes | |
 | description | TEXT | yes | Truncated |
 | published_text | TEXT | yes | Raw RSS pubDate |
+
+## news_details (`/news/{id}`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| item_id | TEXT | no | |
+| title | TEXT | no | From `h1` |
+| url | TEXT | no | |
+| published_iso | TEXT | yes | `article:published_time` |
+| published_text | TEXT | yes | `.newsico` text |
+| source_label | TEXT | yes | e.g. پیشخوان خبر |
+| body_text | TEXT | yes | Truncated to 4000 chars |
+| body_chars | INTEGER | no | Length before truncation |
+
+## article_details (`/article/{id}`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| item_id | TEXT | no | |
+| title | TEXT | no | |
+| url | TEXT | no | |
+| published_iso | TEXT | yes | Meta datetime |
+| published_text | TEXT | yes | Visible date |
+| view_count | INTEGER | yes | |
+| comment_count | INTEGER | yes | |
+| body_text | TEXT | yes | Truncated |
+| body_chars | INTEGER | no | |
+
+## company_details (`/c{id}`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| company_id | TEXT | no | |
+| name | TEXT | no | |
+| url | TEXT | no | |
+| category_labels | TEXT | yes | Semicolon-joined |
+| phone_texts | TEXT | yes | Near `fa-phone` icons |
+| website | TEXT | yes | |
+| rating_text | TEXT | yes | Raw score text |
+
+## Artifacts
+
+- `data/checkpoints/<section>.json` — resume state (`completed_ids`)
+- `data/coverage.json` — per-run row counts and checkpoint totals
+
 
 

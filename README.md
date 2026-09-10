@@ -2,7 +2,7 @@
 
 Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 
-**Version:** 0.5.0
+**Version:** 0.6.0
 
 ## Status
 
@@ -16,7 +16,7 @@ Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 | Catalog: petros, polymer categories, category grades, grade history, products | done |
 | Bourse: deals, offers, byab, company quotas, compare, info-bourse | done |
 | Content: news, articles, events, honors, ads, topco, managers, RSS | done |
-| Remaining: media/tv deep media assets, detail crawls, resume | planned — v0.6+ |
+| Details + resume/checkpoint + coverage report + network smoke tests | done |
 
 ## Honest data notes
 
@@ -52,6 +52,10 @@ wikiplast extract --section bourse --data-dir data
 
 # Content (news / articles / events / honors / ads / topco / managers / RSS)
 wikiplast extract --section content --data-dir data
+
+# Detail pages with resume checkpoints (opt-in; not part of --section all)
+wikiplast extract --section details --data-dir data --detail-limit 20
+wikiplast extract --section details --data-dir data --no-resume --detail-limit 5
 
 # Smoke: fewer grade-detail pages and quota pages
 wikiplast extract --section catalog --grade-history-limit 5 --max-categories 3
