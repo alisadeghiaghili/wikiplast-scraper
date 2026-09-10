@@ -19,7 +19,7 @@
 - [x] Early-stop when a products page yields no new ids
 - [x] Unit tests on HTML fixtures
 
-## v0.4.0 (current)
+## v0.4.0
 
 - [x] Bourse deals `/deals`
 - [x] Bourse offers `/offers`
@@ -29,11 +29,22 @@
 - [x] Info-bourse metrics + top demand/volume `/info-bourse`
 - [x] Unit tests on HTML fixtures
 
-## v0.5.0 (next)
+## v0.5.0 (current)
 
-- [ ] News, articles, events, media, tv, ads (not `/siteads/`), topco, colleague, honors, wikiboss, feeds, categories
+- [x] News `/archive-news` with early-stop pagination
+- [x] Articles `/articles` (dedupe including ادامه مطلب)
+- [x] Events `/events`
+- [x] Honors `/honors`
+- [x] Classified ads `/ads` + featured `/starads` (never `/siteads/`)
+- [x] Featured companies `/topco`
+- [x] Manager profiles `/wikiboss` (`/b{id}`)
+- [x] RSS `/feeds`
+- [x] Unit tests on HTML fixtures
+
+## v0.6.0 (next)
+
+- [ ] Media / TV asset catalogs (beyond shared sidebar cards)
+- [ ] Detail crawls for news/article/company pages
+- [ ] Resume/checkpoint + coverage report
 - [ ] Network integration smoke tests (marked)
-
-## v0.6.0
-
-- [ ] Detail crawls, resume/checkpoint, coverage report, tagged release automation
+- [ ] Tagged release automation

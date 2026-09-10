@@ -13,9 +13,10 @@ from wikiplast.config import Settings
 from wikiplast.extractors.bourse import run_bourse
 from wikiplast.extractors.catalog import run_catalog
 from wikiplast.extractors.companies import run_companies
+from wikiplast.extractors.content import run_content
 from wikiplast.extractors.price_sections import run_all_prices
 
-SECTION_CHOICES = ("prices", "companies", "catalog", "bourse", "all")
+SECTION_CHOICES = ("prices", "companies", "catalog", "bourse", "content", "all")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -63,6 +64,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=10,
         help="Max company-quota pages under /behin.php (default: 10).",
     )
+    extract.add_argument(
+        "--max-list-pages",
+        type=int,
+        default=20,
+        help="Max pages for content listings such as news/ads (default: 20).",
+    )
     return parser
 
 
@@ -85,6 +92,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_companies_flag = "all" in sections or "companies" in sections
     run_catalog_flag = "all" in sections or "catalog" in sections
     run_bourse_flag = "all" in sections or "bourse" in sections
+    run_content_flag = "all" in sections or "content" in sections
 
     with HttpClient(settings) as client:
         if run_prices:
@@ -108,6 +116,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 client,
                 data_dir,
                 max_quota_pages=args.max_quota_pages,
+            )
+            for name, paths in artifacts.items():
+                print(f"{name}: {paths['csv']}")
+        if run_content_flag:
+            artifacts = run_content(
+                client,
+                data_dir,
+                max_list_pages=args.max_list_pages,
             )
             for name, paths in artifacts.items():
                 print(f"{name}: {paths['csv']}")
