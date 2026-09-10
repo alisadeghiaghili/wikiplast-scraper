@@ -1,6 +1,6 @@
 # Roadmap
 
-## v0.2.0 (current)
+## v0.2.0
 
 - [x] Package layout + pyproject + ruff/mypy/pytest config
 - [x] HttpClient with real 403 session rotation and robots guard
@@ -9,18 +9,21 @@
 - [x] Companies dedupe by `company_id` + queue-based pagination
 - [x] Unit tests on HTML fixtures (no network)
 
-## v0.3.0 (next)
+## v0.3.0 (current)
 
-- [ ] Petrochemicals `/petros`
-- [ ] Polymer categories `/polycats`, `/cat{id}`
-- [ ] Grades `/gradeprice/{id}`, `/g{id}`
-- [ ] Products `/products`
-- [ ] Network integration smoke tests (marked)
+- [x] Petrochemicals `/petros` (dedupe by company id)
+- [x] Polymer categories `/polycats` (parents + children)
+- [x] Category grades `/cat{id}` via `/grides/{id}` discovery
+- [x] Grade price history `/gradeprice/{id}` (Jalali → ISO)
+- [x] Products `/products` (`.proditem` /cp + `.nibox` /products/{id}; view_count separate from company)
+- [x] Early-stop when a products page yields no new ids
+- [x] Unit tests on HTML fixtures
 
-## v0.4.0
+## v0.4.0 (next)
 
 - [ ] Bourse: `/deals`, `/offers`, `/byab`, `/behinyab`, `/compare`, `/info-bourse`
 - [ ] Charts `/chart/...`, `/diagram/...`
+- [ ] Network integration smoke tests (marked)
 
 ## v0.5.0
 
