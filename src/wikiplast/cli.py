@@ -9,12 +9,14 @@ from pathlib import Path
 
 from wikiplast import __version__
 from wikiplast.adapters.http_client import HttpClient
+from wikiplast.adapters.report import format_report
 from wikiplast.config import Settings
 from wikiplast.extractors.bourse import run_bourse
 from wikiplast.extractors.catalog import run_catalog
 from wikiplast.extractors.companies import run_companies
 from wikiplast.extractors.content import run_content
 from wikiplast.extractors.details import run_details
+from wikiplast.extractors.media import run_media
 from wikiplast.extractors.price_sections import run_all_prices
 
 SECTION_CHOICES = (
@@ -24,6 +26,7 @@ SECTION_CHOICES = (
     "bourse",
     "content",
     "details",
+    "media",
     "all",
 )
 
@@ -95,6 +98,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip listing pages already recorded in checkpoints (content/companies).",
     )
+    sub.add_parser("report", help="Print a data inventory report for --data-dir.")
     return parser
 
 
@@ -112,12 +116,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     settings = Settings.from_env()
     data_dir = args.data_dir or settings.data_dir
 
-    sections = args.sections or ["all"]
+    if args.command == "report":
+        print(format_report(data_dir))
+        return 0
+
+    sections = getattr(args, "sections", None) or ["all"]
     run_prices = "all" in sections or "prices" in sections
     run_companies_flag = "all" in sections or "companies" in sections
     run_catalog_flag = "all" in sections or "catalog" in sections
     run_bourse_flag = "all" in sections or "bourse" in sections
     run_content_flag = "all" in sections or "content" in sections
+    run_media_flag = "all" in sections or "media" in sections
     # Details are heavy; include in "all" only when explicitly requested
     # or when --section details is passed.
     run_details_flag = "details" in sections
@@ -156,6 +165,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 max_list_pages=args.max_list_pages,
                 resume_listings=args.resume_listings,
             )
+            for name, paths in artifacts.items():
+                print(f"{name}: {paths['csv']}")
+        if run_media_flag:
+            artifacts = run_media(client, data_dir)
             for name, paths in artifacts.items():
                 print(f"{name}: {paths['csv']}")
         if run_details_flag:
