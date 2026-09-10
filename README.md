@@ -2,7 +2,7 @@
 
 Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 
-**Version:** 0.3.0
+**Version:** 0.4.0
 
 ## Status
 
@@ -14,7 +14,8 @@ Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 | Price extractors: `npc`, `archive` (`/prices`), `market` | done |
 | Companies extractor with dedupe + real pagination queue | done |
 | Catalog: petros, polymer categories, category grades, grade history, products | done |
-| Remaining site sections (news, ads, bourse, …) | planned — v0.4+ |
+| Bourse: deals, offers, byab, company quotas, compare, info-bourse | done |
+| Remaining site sections (news, ads, content, …) | planned — v0.5+ |
 
 ## Honest data notes
 
@@ -45,8 +46,12 @@ wikiplast extract --section companies --data-dir data
 # Catalog (petros / polycats / grades / products)
 wikiplast extract --section catalog --data-dir data
 
-# Smoke: fewer grade-detail pages
+# Bourse (deals / offers / byab / quotas / compare / info-bourse)
+wikiplast extract --section bourse --data-dir data
+
+# Smoke: fewer grade-detail pages and quota pages
 wikiplast extract --section catalog --grade-history-limit 5 --max-categories 3
+wikiplast extract --section bourse --max-quota-pages 2
 ```
 
 ## Output layout

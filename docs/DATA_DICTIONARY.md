@@ -1,4 +1,4 @@
-# Data dictionary (v0.3.0)
+# Data dictionary (v0.4.0)
 
 ## npc_prices / archive_prices / market_prices
 
@@ -99,3 +99,94 @@
 - BCP files use `NULL` as the missing-value token; stage then `NULLIF(col, 'NULL')`.
 - Booleans are `0`/`1`.
 - Jalali dates are kept as text; convert in T-SQL or Python when building a Gregorian calendar dimension.
+
+## bourse_deals (`/deals`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| polymer_category | TEXT | yes | Category banner |
+| grade_name | TEXT | no | |
+| avg_price_rial | INTEGER | yes | |
+| supply_tons | INTEGER | yes | |
+| traded_tons | INTEGER | yes | |
+| contract_type | TEXT | yes | e.g. cash contract note |
+| as_of_iso | TEXT | yes | Jalali from page title |
+| source_url | TEXT | no | |
+
+## bourse_offers (`/offers`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| polymer_category | TEXT | yes | |
+| grade_name | TEXT | no | |
+| base_price_rial | INTEGER | yes | |
+| base_qty | INTEGER | yes | |
+| max_increase | INTEGER | yes | |
+| as_of_iso | TEXT | yes | |
+| source_url | TEXT | no | |
+
+## byab_status (`/byab`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| product_name | TEXT | no | |
+| category_id | TEXT | yes | `/cat{id}` |
+| category_url | TEXT | yes | |
+| status | TEXT | yes | |
+| monthly_purchase_cap | TEXT | yes | |
+| valid_from | TEXT | yes | Jalali text |
+| diagram_url | TEXT | yes | |
+| as_of_iso | TEXT | yes | |
+| source_url | TEXT | no | |
+
+## company_quotas (`/behinyab`, `/behin.php`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| row_number | TEXT | yes | |
+| unit_name | TEXT | no | |
+| national_code | TEXT | yes | |
+| material_name | TEXT | yes | |
+| material_code | TEXT | yes | |
+| annual_performance | TEXT | yes | |
+| calculated_quota | TEXT | yes | |
+| page | INTEGER | no | Source page number |
+| source_url | TEXT | no | |
+
+## price_comparisons (`/compare`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| polymer_category | TEXT | yes | |
+| grade_name | TEXT | no | |
+| grade_id | TEXT | yes | `/g{id}` |
+| grade_url | TEXT | yes | |
+| base_price_prev | INTEGER | yes | Previous week Rials |
+| base_price_current | INTEGER | yes | Current week Rials |
+| change_abs | TEXT | yes | |
+| change_pct | TEXT | yes | |
+| global_usd_per_ton | TEXT | yes | |
+| source_url | TEXT | no | |
+
+## bourse_metrics (`/info-bourse`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| metric_key | TEXT | no | snake_case key |
+| metric_label | TEXT | yes | |
+| metric_value_raw | TEXT | yes | |
+| metric_value_num | INTEGER | yes | |
+| source_url | TEXT | no | |
+
+## bourse_top_products (`/info-bourse`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| rank_list | TEXT | no | `demand` \| `volume` |
+| product_name | TEXT | no | |
+| category_id | TEXT | yes | |
+| category_url | TEXT | yes | |
+| amount_tons | TEXT | yes | |
+| amount_value | INTEGER | yes | |
+| source_url | TEXT | no | |
+
