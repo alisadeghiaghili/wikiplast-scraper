@@ -10,6 +10,11 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
 
 # IDE
 .vscode/
@@ -24,4 +29,10 @@ Thumbs.db
 # Env
 .env
 .env.*
-venv/
+
+# Data artifacts (regenerate via CLI)
+data/csv/
+data/sqlserver/
+data/wikiplast.sqlite
+data/*.csv
+data/*.json
