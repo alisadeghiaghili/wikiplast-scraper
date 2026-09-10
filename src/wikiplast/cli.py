@@ -14,9 +14,18 @@ from wikiplast.extractors.bourse import run_bourse
 from wikiplast.extractors.catalog import run_catalog
 from wikiplast.extractors.companies import run_companies
 from wikiplast.extractors.content import run_content
+from wikiplast.extractors.details import run_details
 from wikiplast.extractors.price_sections import run_all_prices
 
-SECTION_CHOICES = ("prices", "companies", "catalog", "bourse", "content", "all")
+SECTION_CHOICES = (
+    "prices",
+    "companies",
+    "catalog",
+    "bourse",
+    "content",
+    "details",
+    "all",
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -70,6 +79,17 @@ def build_parser() -> argparse.ArgumentParser:
         default=20,
         help="Max pages for content listings such as news/ads (default: 20).",
     )
+    extract.add_argument(
+        "--detail-limit",
+        type=int,
+        default=25,
+        help="Max new detail pages per entity type this run (default: 25).",
+    )
+    extract.add_argument(
+        "--no-resume",
+        action="store_true",
+        help="Ignore checkpoints and re-crawl details from scratch.",
+    )
     return parser
 
 
@@ -93,6 +113,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_catalog_flag = "all" in sections or "catalog" in sections
     run_bourse_flag = "all" in sections or "bourse" in sections
     run_content_flag = "all" in sections or "content" in sections
+    # Details are heavy; include in "all" only when explicitly requested
+    # or when --section details is passed.
+    run_details_flag = "details" in sections
 
     with HttpClient(settings) as client:
         if run_prices:
@@ -127,6 +150,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             for name, paths in artifacts.items():
                 print(f"{name}: {paths['csv']}")
+        if run_details_flag:
+            artifacts = run_details(
+                client,
+                data_dir,
+                resume=not args.no_resume,
+                news_limit=args.detail_limit,
+                article_limit=args.detail_limit,
+                company_limit=args.detail_limit,
+            )
+            for name, paths in artifacts.items():
+                for kind, path in paths.items():
+                    print(f"{name}.{kind}: {path}")
     return 0
 
 
