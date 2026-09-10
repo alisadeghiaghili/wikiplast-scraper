@@ -1,4 +1,4 @@
-# Data dictionary (v0.4.0)
+# Data dictionary (v0.5.0)
 
 ## npc_prices / archive_prices / market_prices
 
@@ -189,4 +189,62 @@
 | amount_tons | TEXT | yes | |
 | amount_value | INTEGER | yes | |
 | source_url | TEXT | no | |
+
+## news / articles / events / honors
+
+Shared schema from content listings.
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| kind | TEXT | no | `news` \| `article` \| `event` \| `honor` |
+| item_id | TEXT | no | From `/news/{id}` or `/article/{id}` |
+| title | TEXT | no | Cleaned title |
+| url | TEXT | no | Absolute |
+| image_url | TEXT | yes | |
+| published_text | TEXT | yes | Raw date/label when present |
+| source_url | TEXT | no | Listing page |
+
+## classified_ads (`/ads`, `/starads`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| ad_id | TEXT | no | `/detail/{id}` |
+| title | TEXT | no | Slug fallback for featured cards showing only «ویژه» |
+| url | TEXT | no | |
+| image_url | TEXT | yes | |
+| is_featured | INTEGER | no | 1 from `/starads` |
+| category_path | TEXT | yes | Reserved for `/ads/{cat}` |
+| source_url | TEXT | no | |
+
+## featured_companies (`/topco`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| company_id | TEXT | no | `/c{id}` |
+| name | TEXT | no | |
+| url | TEXT | no | |
+| category_label | TEXT | yes | |
+| category_url | TEXT | yes | |
+| logo_url | TEXT | yes | |
+| source_url | TEXT | no | |
+
+## manager_profiles (`/wikiboss`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| profile_id | TEXT | no | `/b{id}` |
+| name | TEXT | no | |
+| birthplace | TEXT | yes | From متولد text |
+| url | TEXT | no | |
+| source_url | TEXT | no | |
+
+## feed_entries (`/feeds`)
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| title | TEXT | no | |
+| link | TEXT | yes | |
+| description | TEXT | yes | Truncated |
+| published_text | TEXT | yes | Raw RSS pubDate |
+
 
