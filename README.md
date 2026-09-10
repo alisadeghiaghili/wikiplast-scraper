@@ -2,7 +2,7 @@
 
 Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 
-**Version:** 0.2.0
+**Version:** 0.3.0
 
 ## Status
 
@@ -13,14 +13,16 @@ Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 | Storage: CSV + SQLite + SQL Server BCP export | done |
 | Price extractors: `npc`, `archive` (`/prices`), `market` | done |
 | Companies extractor with dedupe + real pagination queue | done |
-| Remaining site sections (news, ads, bourse, …) | planned — v0.3+ |
+| Catalog: petros, polymer categories, category grades, grade history, products | done |
+| Remaining site sections (news, ads, bourse, …) | planned — v0.4+ |
 
 ## Honest data notes
 
 - `/market-prices` exposes grade/day **structure** to anonymous clients; numeric cells are often placeholders (`قیمت`) and are stored with `is_gated=1`.
 - Full market archive requires a paid subscription. This tool does **not** bypass paywalls.
 - `/siteads/` is disallowed by `robots.txt` and is never fetched.
-- v0.1 shipped a companies file with ~37× duplicate rows. v0.2 deduplicates by `company_id`.
+- v0.1 shipped a companies file with ~37× duplicate rows. v0.2+ deduplicates by `company_id`.
+- `/products/2` currently mirrors page 1 for anonymous clients; the extractor stops when a page yields no new product ids.
 
 ## Install
 
@@ -39,6 +41,12 @@ wikiplast extract --section prices --data-dir data
 
 # Companies only
 wikiplast extract --section companies --data-dir data
+
+# Catalog (petros / polycats / grades / products)
+wikiplast extract --section catalog --data-dir data
+
+# Smoke: fewer grade-detail pages
+wikiplast extract --section catalog --grade-history-limit 5 --max-categories 3
 ```
 
 ## Output layout
@@ -49,6 +57,16 @@ data/
 ├── sqlserver/            # UTF-8 CSV with NULL token for BULK INSERT
 ├── wikiplast.sqlite      # local warehouse (table per section)
 ```
+
+### Sections written by `catalog`
+
+| Table | Source |
+|-------|--------|
+| `petro_companies` | `/petros` |
+| `polymer_categories` | `/polycats` |
+| `category_grades` | `/cat{id}` via `/grides/{id}` |
+| `grade_price_history` | `/gradeprice/{id}` (capped) |
+| `products` | `/products` `.proditem` + `.nibox` |
 
 ### SQL Server import (BCP)
 
@@ -70,7 +88,6 @@ WITH (
 ```bash
 python -m pytest
 python -m ruff check src tests
-python -m mypy src/wikiplast
 ```
 
 Network tests are opt-in:

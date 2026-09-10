@@ -1,4 +1,4 @@
-# Data dictionary (v0.2.0)
+# Data dictionary (v0.3.0)
 
 ## npc_prices / archive_prices / market_prices
 
@@ -29,6 +29,70 @@
 | verified | INTEGER | no | 0/1 |
 | category | TEXT | yes | First category seen for this company |
 | source_url | TEXT | no | Listing page |
+
+## petro_companies
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| company_id | TEXT | no | `/petros/{id}` |
+| name | TEXT | no | |
+| url | TEXT | no | Absolute |
+| grade_count | INTEGER | no | |
+| grades | TEXT | yes | `name (id); ...` |
+| source_url | TEXT | no | `/petros` or `/polycats` |
+
+## polymer_categories
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| category_id | TEXT | no | `/grides/{id}` |
+| name | TEXT | no | |
+| url | TEXT | no | |
+| parent_category | TEXT | yes | Empty for top-level families |
+| parent_id | TEXT | yes | Empty for top-level |
+| description | TEXT | yes | |
+| source_url | TEXT | no | `/polycats` |
+
+## category_grades
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| grade_id | TEXT | no | `/gradeprice/{id}` |
+| name | TEXT | no | |
+| url | TEXT | no | |
+| petrochemical | TEXT | yes | |
+| petrochemical_url | TEXT | yes | |
+| datasheet_url | TEXT | yes | Empty when site shows `-` |
+| category_id | TEXT | no | |
+| category_name | TEXT | yes | |
+| source_url | TEXT | no | `/cat{id}` |
+
+## grade_price_history
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| grade_id | TEXT | no | |
+| grade_name | TEXT | yes | From page title |
+| as_of_jalali | TEXT | no | Raw date text |
+| as_of_iso | TEXT | yes | Jalali `YYYY-MM-DD` when parsed |
+| price_raw | TEXT | yes | |
+| price_value | INTEGER | yes | |
+| currency | TEXT | no | `IRR` |
+| source_url | TEXT | no | |
+
+## products
+
+| Column | Type | Nullable | Notes |
+|--------|------|----------|-------|
+| product_id | TEXT | no | From `/cp{id}` or `/products/{id}` |
+| product_key | TEXT | no | `cp` \| `products` |
+| name | TEXT | no | |
+| url | TEXT | no | |
+| image_url | TEXT | yes | |
+| company_id | TEXT | yes | From `prdframe#comp{id}` when present |
+| company_name | TEXT | yes | Banner text or `fa-cog` sibling — never the view count |
+| view_count | INTEGER | yes | Only on `.nibox` cards |
+| source_url | TEXT | no | |
 
 ## SQL Server notes
 
