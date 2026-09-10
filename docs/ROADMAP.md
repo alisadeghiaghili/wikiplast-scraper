@@ -49,16 +49,25 @@
 - [x] CLI `--section details`, `--detail-limit`, `--no-resume`
 - [x] Network smoke tests (`pytest -m network`)
 
-## v0.7.0 (current)
+## v0.7.0
 
 - [x] Listing resume for news/articles/events/companies (`--resume-listings`)
 - [x] JSONL export alongside CSV/SQLite/BCP
 - [x] GitHub Actions CI (ruff + unit tests, Python 3.11/3.12)
 - [x] Unit tests for listing resume and JSONL
 
-## v0.8.0 (next)
+## v0.8.0 (current)
 
-- [ ] Media / TV asset catalogs (beyond shared sidebar cards)
-- [ ] Optional Parquet export
-- [ ] Live end-to-end extract runbook / coverage snapshot on main
+- [x] Media catalog `/media/{slug}`
+- [x] Training videos `/tv` → `/videos/{id}`
+- [x] `wikiplast report` inventory command
+- [x] Unit tests for media parsers and report
+
+Parquet export deferred: JSONL + BCP already cover SQL Server / pandas loads
+without adding a heavy `pyarrow` dependency.
+
+## v0.9.0 (next)
+
+- [ ] Live end-to-end extract on public sections with coverage snapshot
+- [ ] Optional rate-limit profile presets (conservative / default)
 

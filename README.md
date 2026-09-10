@@ -2,7 +2,7 @@
 
 Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 
-**Version:** 0.7.0
+**Version:** 0.8.0
 
 ## Status
 
@@ -18,6 +18,7 @@ Public-page extraction toolkit for [wikiplast.ir](https://wikiplast.ir).
 | Content: news, articles, events, honors, ads, topco, managers, RSS | done |
 | Details + resume/checkpoint + coverage report + network smoke tests | done |
 | Listing resume + GitHub Actions CI | done |
+| Media/TV catalogs + `wikiplast report` inventory | done |
 
 ## Honest data notes
 
@@ -53,6 +54,12 @@ wikiplast extract --section bourse --data-dir data
 
 # Content (news / articles / events / honors / ads / topco / managers / RSS)
 wikiplast extract --section content --data-dir data
+
+# Media and training videos
+wikiplast extract --section media --data-dir data
+
+# Inventory report (CSV counts, SQLite/BCP/JSONL presence, coverage)
+wikiplast report --data-dir data
 
 # Detail pages with resume checkpoints (opt-in; not part of --section all)
 wikiplast extract --section details --data-dir data --detail-limit 20
